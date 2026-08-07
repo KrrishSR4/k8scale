@@ -14,8 +14,9 @@ export default {
   	},
   	extend: {
   		fontFamily: {
+  			display: ['Archivo Black', 'Hind', 'sans-serif'],
   			sans: [
-  				'Inter',
+  				'Hind',
   				'ui-sans-serif',
   				'system-ui',
   				'-apple-system',
@@ -28,7 +29,7 @@ export default {
   				'sans-serif'
   			],
   			mono: [
-  				'Space Mono',
+  				'JetBrains Mono',
   				'ui-monospace',
   				'SFMono-Regular',
   				'Menlo',
@@ -133,6 +134,10 @@ export default {
   					transform: 'translateY(0)'
   				}
   			},
+  			'reveal-up': {
+  				'0%': { opacity: '0', transform: 'translateY(24px)' },
+  				'100%': { opacity: '1', transform: 'translateY(0)' }
+  			},
   			'slide-in-left': {
   				'0%': {
   					opacity: '0',
@@ -148,6 +153,7 @@ export default {
   			'accordion-down': 'accordion-down 0.2s ease-out',
   			'accordion-up': 'accordion-up 0.2s ease-out',
   			'fade-in': 'fade-in 0.5s ease-out forwards',
+  			'reveal-up': 'reveal-up 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards',
   			'slide-in-left': 'slide-in-left 0.4s ease-out forwards'
   		},
   		boxShadow: {

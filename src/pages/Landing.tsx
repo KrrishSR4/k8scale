@@ -1,18 +1,32 @@
+import { useEffect } from 'react';
 import LandingNav from '@/components/landing/LandingNav';
 import HeroSection from '@/components/landing/HeroSection';
 import FeaturesSection from '@/components/landing/FeaturesSection';
 import HowItWorksSection from '@/components/landing/HowItWorksSection';
-import TechStackSection from '@/components/landing/TechStackSection';
+import ClusterSetupSection from '@/components/landing/ClusterSetupSection';
+import WaitlistSection from '@/components/landing/WaitlistSection';
 import Footer from '@/components/landing/Footer';
+import { useSmoothScroll } from '@/hooks/useSmoothScroll';
+import { useReveal } from '@/hooks/useReveal';
 
 const Landing = () => {
+  useSmoothScroll();
+  const ref = useReveal<HTMLDivElement>();
+
+  useEffect(() => {
+    document.title = 'AutoScaleX — Kubernetes deploys without the YAML';
+  }, []);
+
   return (
-    <div className="min-h-screen bg-background">
+    <div ref={ref} className="min-h-screen bg-background">
       <LandingNav />
-      <HeroSection />
-      <FeaturesSection />
-      <HowItWorksSection />
-      <TechStackSection />
+      <main>
+        <HeroSection />
+        <FeaturesSection />
+        <HowItWorksSection />
+        <ClusterSetupSection />
+        <WaitlistSection />
+      </main>
       <Footer />
     </div>
   );
