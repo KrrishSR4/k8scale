@@ -1,44 +1,34 @@
-import { motion } from 'framer-motion';
 import { LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-interface StatCardProps {
-  title: string;
-  value: string | number;
+interface Props {
   icon: LucideIcon;
-  suffix?: string;
-  trend?: {
-    value: number;
-    positive: boolean;
-  };
+  label: string;
+  value: string | number;
+  hint?: string;
+  trend?: number;
   className?: string;
 }
 
-const StatCard = ({ title, value, icon: Icon, suffix, trend, className }: StatCardProps) => {
-  return (
-    <motion.div
-      whileHover={{ y: -2, transition: { duration: 0.2 } }}
-      className={cn('glass-card p-6 hover:border-primary/30 transition-colors', className)}
-    >
-      <div className="flex items-start justify-between">
-        <div>
-          <p className="text-sm text-muted-foreground mb-1">{title}</p>
-          <div className="flex items-baseline gap-1">
-            <span className="text-3xl font-bold text-foreground">{value}</span>
-            {suffix && <span className="text-lg text-muted-foreground">{suffix}</span>}
-          </div>
-          {trend && (
-            <div className={cn('text-sm mt-2', trend.positive ? 'text-success' : 'text-destructive')}>
-              {trend.positive ? '↑' : '↓'} {Math.abs(trend.value)}% from last week
-            </div>
-          )}
-        </div>
-        <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-          <Icon className="w-6 h-6 text-primary" />
-        </div>
-      </div>
-    </motion.div>
-  );
-};
+const StatCard = ({ icon: Icon, label, value, hint, trend, className }: Props) => (
+  <div className={cn('surface surface-hover group relative overflow-hidden p-5', className)}>
+    <div className="flex items-start justify-between">
+      <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">{label}</p>
+      <Icon className="h-4 w-4 text-muted-foreground transition-colors duration-300 group-hover:text-primary" />
+    </div>
+    <p className="mt-4 font-display text-3xl tabular-nums">{value}</p>
+    {(hint || trend !== undefined) && (
+      <p className="mt-1.5 text-xs text-muted-foreground">
+        {trend !== undefined && (
+          <span className={trend >= 0 ? 'text-success' : 'text-destructive'}>
+            {trend >= 0 ? '▲' : '▼'} {Math.abs(trend)}%{' '}
+          </span>
+        )}
+        {hint}
+      </p>
+    )}
+    <span className="absolute inset-x-0 bottom-0 h-px scale-x-0 bg-primary transition-transform duration-500 group-hover:scale-x-100" />
+  </div>
+);
 
 export default StatCard;
