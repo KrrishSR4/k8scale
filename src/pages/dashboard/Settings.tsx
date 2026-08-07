@@ -15,7 +15,6 @@ const Settings = () => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const [displayName, setDisplayName] = useState('');
-  const [company, setCompany] = useState('');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
@@ -23,12 +22,11 @@ const Settings = () => {
     if (!user) return;
     supabase
       .from('profiles')
-      .select('display_name, company')
+      .select('display_name')
       .eq('id', user.id)
       .maybeSingle()
       .then(({ data }) => {
         setDisplayName((data?.display_name as string) ?? '');
-        setCompany((data?.company as string) ?? '');
       });
   }, [user]);
 
@@ -40,7 +38,7 @@ const Settings = () => {
     setSaving(true);
     const { error: err } = await supabase
       .from('profiles')
-      .update({ display_name: parsed.data, company: company.trim().slice(0, 80) || null } as never)
+      .update({ display_name: parsed.data } as never)
       .eq('id', user!.id);
     setSaving(false);
     if (err) return toast.error(err.message);
@@ -56,10 +54,6 @@ const Settings = () => {
             <label className="mb-1.5 block font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Display name</label>
             <Input value={displayName} onChange={(e) => setDisplayName(e.target.value)} maxLength={60} />
             {error && <p className="mt-1 text-xs text-destructive">{error}</p>}
-          </div>
-          <div>
-            <label className="mb-1.5 block font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Company</label>
-            <Input value={company} onChange={(e) => setCompany(e.target.value)} maxLength={80} placeholder="Acme Inc." />
           </div>
           <div>
             <label className="mb-1.5 block font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Email</label>
