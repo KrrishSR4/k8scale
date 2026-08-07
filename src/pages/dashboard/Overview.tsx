@@ -1,150 +1,129 @@
-import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { Box, Rocket, Server, Cpu, HardDrive, TrendingUp } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Boxes, Rocket, Gauge, Timer, ArrowUpRight } from 'lucide-react';
+import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import StatCard from '@/components/dashboard/StatCard';
-import { CardSkeleton } from '@/components/dashboard/LoadingSkeleton';
-import { mockOverviewStats, mockApplications } from '@/data/mockData';
 import StatusBadge from '@/components/dashboard/StatusBadge';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Button } from '@/components/ui/button';
+import { useApplications, useDeployments } from '@/hooks/useApplications';
+import { useLiveMetrics } from '@/hooks/useLiveMetrics';
 
 const Overview = () => {
-  const [loading, setLoading] = useState(true);
+  const { data: apps = [], isLoading } = useApplications();
+  const { data: deployments = [] } = useDeployments();
+  const metrics = useLiveMetrics(36, 2000);
 
-  useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 800);
-    return () => clearTimeout(timer);
-  }, []);
+  const running = apps.filter((a) => a.status === 'running').length;
+  const successes = deployments.filter((d) => d.status === 'success');
+  const rate = deployments.length ? Math.round((successes.length / deployments.length) * 100) : 100;
+  const avg = successes.length
+    ? Math.round(successes.reduce((s, d) => s + (d.duration_seconds ?? 0), 0) / successes.length)
+    : 0;
+  const latest = metrics[metrics.length - 1];
 
   return (
-    <DashboardLayout>
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground mb-1">Dashboard Overview</h1>
-          <p className="text-muted-foreground">Monitor your infrastructure at a glance</p>
-        </div>
+    <DashboardLayout
+      title="Overview"
+      subtitle="Live snapshot of your cluster"
+      actions={
+        <Link to="/dashboard/applications">
+          <Button size="sm">New application</Button>
+        </Link>
+      }
+    >
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        {isLoading ? (
+          Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-[132px] rounded-xl" />)
+        ) : (
+          <>
+            <StatCard icon={Boxes} label="Applications" value={apps.length} hint={`${running} running`} />
+            <StatCard icon={Rocket} label="Deployments" value={deployments.length} hint={`${rate}% success rate`} />
+            <StatCard icon={Gauge} label="Cluster CPU" value={`${Math.round(latest?.cpu ?? 0)}%`} hint="across all nodes" />
+            <StatCard icon={Timer} label="Avg deploy" value={avg ? `${avg}s` : '—'} hint="build to healthy" />
+          </>
+        )}
+      </div>
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-          {loading ? (
-            <>
-              {[...Array(5)].map((_, i) => (
-                <CardSkeleton key={i} />
-              ))}
-            </>
-          ) : (
-            <>
-              <StatCard
-                title="Total Applications"
-                value={mockOverviewStats.totalApps}
-                icon={Box}
-                trend={{ value: 12, positive: true }}
-              />
-              <StatCard
-                title="Active Deployments"
-                value={mockOverviewStats.activeDeployments}
-                icon={Rocket}
-              />
-              <StatCard
-                title="Running Pods"
-                value={mockOverviewStats.runningPods}
-                icon={Server}
-              />
-              <StatCard
-                title="CPU Usage"
-                value={mockOverviewStats.cpuUsage}
-                suffix="%"
-                icon={Cpu}
-              />
-              <StatCard
-                title="Memory Usage"
-                value={mockOverviewStats.memoryUsage}
-                suffix="%"
-                icon={HardDrive}
-              />
-            </>
-          )}
-        </div>
-
-        {/* Recent Activity */}
-        <div className="grid lg:grid-cols-2 gap-6">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="glass-card"
-          >
-            <div className="px-6 py-4 border-b border-border flex items-center justify-between">
-              <h2 className="font-semibold text-foreground">Recent Applications</h2>
-              <TrendingUp className="w-4 h-4 text-muted-foreground" />
+      <div className="mt-4 grid gap-4 lg:grid-cols-3">
+        <div className="surface p-5 lg:col-span-2">
+          <div className="mb-4 flex items-center justify-between">
+            <div>
+              <h2 className="font-display text-sm uppercase">Request throughput</h2>
+              <p className="text-xs text-muted-foreground">Streaming · 2s resolution</p>
             </div>
-            <div className="divide-y divide-border">
-              {mockApplications.slice(0, 4).map((app) => (
-                <div key={app.id} className="px-6 py-4 flex items-center justify-between hover:bg-muted/30 transition-colors">
-                  <div>
-                    <p className="font-medium text-foreground">{app.name}</p>
-                    <p className="text-sm text-muted-foreground">{app.repo}</p>
+            <span className="font-mono text-xs text-primary">{latest?.requests ?? 0} req/s</span>
+          </div>
+          <div className="h-64">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={metrics} margin={{ left: -22, right: 6, top: 6 }}>
+                <defs>
+                  <linearGradient id="reqFill" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.42} />
+                    <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <XAxis dataKey="label" tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} tickLine={false} axisLine={false} minTickGap={40} />
+                <YAxis tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} tickLine={false} axisLine={false} />
+                <Tooltip
+                  contentStyle={{
+                    background: 'hsl(var(--popover))',
+                    border: '1px solid hsl(var(--border))',
+                    borderRadius: 10,
+                    fontSize: 12,
+                  }}
+                />
+                <Area type="monotone" dataKey="requests" stroke="hsl(var(--primary))" strokeWidth={2} fill="url(#reqFill)" isAnimationActive={false} />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        <div className="surface p-5">
+          <h2 className="mb-4 font-display text-sm uppercase">Recent deployments</h2>
+          <div className="space-y-3">
+            {deployments.slice(0, 6).map((d) => {
+              const app = apps.find((a) => a.id === d.application_id);
+              return (
+                <div key={d.id} className="flex items-center justify-between gap-3 border-b border-border/60 pb-3 last:border-0 last:pb-0">
+                  <div className="min-w-0">
+                    <p className="truncate text-sm">{app?.name ?? 'Application'}</p>
+                    <p className="truncate font-mono text-[11px] text-muted-foreground">{d.version}</p>
                   </div>
-                  <StatusBadge status={app.status} />
+                  <StatusBadge status={d.status} />
                 </div>
-              ))}
-            </div>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="glass-card"
-          >
-            <div className="px-6 py-4 border-b border-border">
-              <h2 className="font-semibold text-foreground">Quick Stats</h2>
-            </div>
-            <div className="p-6 space-y-6">
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm text-muted-foreground">CPU Utilization</span>
-                  <span className="text-sm font-medium text-foreground">{mockOverviewStats.cpuUsage}%</span>
-                </div>
-                <div className="h-2 rounded-full bg-muted overflow-hidden">
-                  <motion.div
-                    initial={{ width: 0 }}
-                    animate={{ width: `${mockOverviewStats.cpuUsage}%` }}
-                    transition={{ duration: 1, delay: 0.5 }}
-                    className="h-full bg-gradient-to-r from-primary to-cyan-400 rounded-full"
-                  />
-                </div>
-              </div>
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm text-muted-foreground">Memory Utilization</span>
-                  <span className="text-sm font-medium text-foreground">{mockOverviewStats.memoryUsage}%</span>
-                </div>
-                <div className="h-2 rounded-full bg-muted overflow-hidden">
-                  <motion.div
-                    initial={{ width: 0 }}
-                    animate={{ width: `${mockOverviewStats.memoryUsage}%` }}
-                    transition={{ duration: 1, delay: 0.6 }}
-                    className="h-full bg-gradient-to-r from-success to-emerald-400 rounded-full"
-                  />
-                </div>
-              </div>
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm text-muted-foreground">Cluster Health</span>
-                  <span className="text-sm font-medium text-success">Healthy</span>
-                </div>
-                <div className="h-2 rounded-full bg-muted overflow-hidden">
-                  <motion.div
-                    initial={{ width: 0 }}
-                    animate={{ width: '98%' }}
-                    transition={{ duration: 1, delay: 0.7 }}
-                    className="h-full bg-gradient-to-r from-success to-emerald-400 rounded-full"
-                  />
-                </div>
-              </div>
-            </div>
-          </motion.div>
+              );
+            })}
+            {!deployments.length && (
+              <p className="text-sm text-muted-foreground">No deployments yet. Create an app and ship it.</p>
+            )}
+          </div>
+          <Link to="/dashboard/deployments" className="link-underline mt-4 inline-flex items-center gap-1 text-xs text-primary">
+            View all <ArrowUpRight className="h-3 w-3" />
+          </Link>
         </div>
+      </div>
+
+      <div className="surface mt-4 p-5">
+        <h2 className="mb-4 font-display text-sm uppercase">Applications</h2>
+        {apps.length ? (
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+            {apps.slice(0, 6).map((a) => (
+              <Link key={a.id} to="/dashboard/applications" className="surface surface-hover block p-4">
+                <div className="flex items-start justify-between gap-2">
+                  <p className="truncate text-sm font-medium">{a.name}</p>
+                  <StatusBadge status={a.status} />
+                </div>
+                <p className="mt-2 truncate font-mono text-[11px] text-muted-foreground">{a.image}</p>
+                <p className="mt-1 font-mono text-[11px] text-muted-foreground">
+                  {a.region} · {a.replicas} replicas
+                </p>
+              </Link>
+            ))}
+          </div>
+        ) : (
+          <p className="text-sm text-muted-foreground">No applications yet.</p>
+        )}
       </div>
     </DashboardLayout>
   );
