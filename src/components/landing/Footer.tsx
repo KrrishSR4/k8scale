@@ -1,55 +1,53 @@
-import { motion } from 'framer-motion';
-import { Layers, Github, FileText, Mail } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Hexagon } from 'lucide-react';
 
-const Footer = () => {
-  return (
-    <footer className="border-t border-border py-16">
-      <div className="container mx-auto px-4">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="flex flex-col md:flex-row items-center justify-between gap-8"
-        >
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-cyan-400 flex items-center justify-center shadow-lg shadow-primary/30">
-              <Layers className="w-5 h-5 text-primary-foreground" />
-            </div>
-            <span className="text-lg font-bold text-gradient">AutoScaleX</span>
-          </div>
+const groups = [
+  { title: 'Product', links: [['Platform', '#platform'], ['Pipeline', '#pipeline'], ['Connect cluster', '#connect'], ['Console', '/dashboard']] },
+  { title: 'Resources', links: [['Manifests', '#connect'], ['Access', '#waitlist'], ['Sign in', '/auth']] },
+];
 
-          <div className="flex items-center gap-8">
-            <a
-              href="#"
-              className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
-            >
-              <FileText className="w-4 h-4" />
-              Docs
-            </a>
-            <a
-              href="#"
-              className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
-            >
-              <Github className="w-4 h-4" />
-              GitHub
-            </a>
-            <a
-              href="#"
-              className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
-            >
-              <Mail className="w-4 h-4" />
-              Contact
-            </a>
+const Footer = () => (
+  <footer className="border-t border-border">
+    <div className="mx-auto max-w-[1400px] px-5 py-14 sm:px-8 lg:px-14">
+      <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="lg:col-span-2">
+          <div className="flex items-center gap-2.5">
+            <span className="flex h-8 w-8 items-center justify-center rounded-md bg-primary text-primary-foreground">
+              <Hexagon className="h-4 w-4" strokeWidth={2.5} />
+            </span>
+            <span className="font-display text-base">AutoScaleX</span>
           </div>
-
-          <div className="text-sm text-muted-foreground">
-            AutoScaleX © 2026
+          <p className="mt-4 max-w-xs text-sm text-muted-foreground">
+            Kubernetes delivery for teams that would rather write product code than platform code.
+          </p>
+        </div>
+        {groups.map((g) => (
+          <div key={g.title}>
+            <h3 className="font-mono text-[11px] uppercase tracking-[0.22em] text-muted-foreground">{g.title}</h3>
+            <ul className="mt-4 space-y-2.5">
+              {g.links.map(([label, href]) => (
+                <li key={label}>
+                  {href.startsWith('#') ? (
+                    <a href={href} className="link-underline text-sm text-muted-foreground hover:text-foreground">
+                      {label}
+                    </a>
+                  ) : (
+                    <Link to={href} className="link-underline text-sm text-muted-foreground hover:text-foreground">
+                      {label}
+                    </Link>
+                  )}
+                </li>
+              ))}
+            </ul>
           </div>
-        </motion.div>
+        ))}
       </div>
-    </footer>
-  );
-};
+      <div className="mt-12 flex flex-col gap-3 border-t border-border pt-6 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
+        <p>© {new Date().getFullYear()} AutoScaleX. All rights reserved.</p>
+        <p className="font-mono">status: all systems operational</p>
+      </div>
+    </div>
+  </footer>
+);
 
 export default Footer;

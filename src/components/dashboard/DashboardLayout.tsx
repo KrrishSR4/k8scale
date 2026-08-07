@@ -1,222 +1,199 @@
-import { ReactNode, useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { ReactNode, useEffect, useState } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Layers,
+  Hexagon,
   LayoutDashboard,
-  Box,
+  Boxes,
   Rocket,
   Activity,
-  Settings,
-  ChevronLeft,
-  Bell,
-  User,
-  Search,
+  Settings as SettingsIcon,
+  PanelLeftClose,
+  PanelLeftOpen,
+  LogOut,
   Menu,
+  X,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-
-interface DashboardLayoutProps {
-  children: ReactNode;
-}
+import { useAuth } from '@/contexts/AuthContext';
+import { toast } from 'sonner';
 
 const navItems = [
   { icon: LayoutDashboard, label: 'Overview', path: '/dashboard' },
-  { icon: Box, label: 'Applications', path: '/dashboard/applications' },
+  { icon: Boxes, label: 'Applications', path: '/dashboard/applications' },
   { icon: Rocket, label: 'Deployments', path: '/dashboard/deployments' },
   { icon: Activity, label: 'Monitoring', path: '/dashboard/monitoring' },
-  { icon: Settings, label: 'Settings', path: '/dashboard/settings' },
+  { icon: SettingsIcon, label: 'Settings', path: '/dashboard/settings' },
 ];
 
-const DashboardLayout = ({ children }: DashboardLayoutProps) => {
+interface Props {
+  children: ReactNode;
+  title: string;
+  subtitle?: string;
+  actions?: ReactNode;
+}
+
+const DashboardLayout = ({ children, title, subtitle, actions }: Props) => {
   const [collapsed, setCollapsed] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user, signOut } = useAuth();
+
+  useEffect(() => {
+    document.title = `${title} — AutoScaleX Console`;
+  }, [title]);
+
+  useEffect(() => setMobileOpen(false), [location.pathname]);
+
+  const initials = (user?.user_metadata?.display_name || user?.email || 'U')
+    .toString()
+    .slice(0, 2)
+    .toUpperCase();
+
+  const nav = (onNavigate?: () => void) => (
+    <nav className="flex-1 space-y-1 p-2">
+      {navItems.map((item) => {
+        const active = location.pathname === item.path;
+        return (
+          <Link
+            key={item.path}
+            to={item.path}
+            onClick={onNavigate}
+            title={collapsed ? item.label : undefined}
+            className={cn(
+              'group relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-all duration-200',
+              active
+                ? 'bg-sidebar-accent text-sidebar-accent-foreground'
+                : 'text-sidebar-foreground hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground',
+            )}
+          >
+            {active && <span className="absolute left-0 top-1/2 h-5 w-0.5 -translate-y-1/2 rounded-r bg-primary" />}
+            <item.icon
+              className={cn(
+                'h-[18px] w-[18px] shrink-0 transition-colors',
+                active ? 'text-primary' : 'group-hover:text-primary',
+              )}
+            />
+            {!collapsed && <span className="truncate">{item.label}</span>}
+          </Link>
+        );
+      })}
+    </nav>
+  );
 
   return (
-    <div className="min-h-screen bg-background flex">
-      {/* Sidebar */}
+    <div className="min-h-screen bg-background">
+      {/* Desktop sidebar */}
       <aside
         className={cn(
-          'fixed left-0 top-0 h-full border-r border-border bg-sidebar z-40 transition-all duration-300 hidden md:flex flex-col',
-          collapsed ? 'w-16' : 'w-64'
+          'fixed inset-y-0 left-0 z-40 hidden flex-col border-r border-sidebar-border bg-sidebar transition-[width] duration-300 md:flex',
+          collapsed ? 'w-[68px]' : 'w-60',
         )}
       >
-        {/* Logo */}
-        <div className="h-16 flex items-center justify-between px-4 border-b border-sidebar-border">
-          <Link to="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-cyan-400 flex items-center justify-center shadow-lg shadow-primary/30 flex-shrink-0">
-              <Layers className="w-5 h-5 text-primary-foreground" />
-            </div>
-            <AnimatePresence>
-              {!collapsed && (
-                <motion.span
-                  initial={{ opacity: 0, width: 0 }}
-                  animate={{ opacity: 1, width: 'auto' }}
-                  exit={{ opacity: 0, width: 0 }}
-                  className="text-lg font-bold text-gradient overflow-hidden whitespace-nowrap"
-                >
-                  AutoScaleX
-                </motion.span>
-              )}
-            </AnimatePresence>
+        <div className="flex h-16 items-center justify-between border-b border-sidebar-border px-4">
+          <Link to="/" className="flex items-center gap-2.5 overflow-hidden">
+            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-primary text-primary-foreground">
+              <Hexagon className="h-4 w-4" strokeWidth={2.5} />
+            </span>
+            {!collapsed && <span className="font-display text-sm">AutoScaleX</span>}
           </Link>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setCollapsed(!collapsed)}
-            className={cn('flex-shrink-0', collapsed && 'hidden')}
-          >
-            <ChevronLeft className="w-4 h-4" />
-          </Button>
         </div>
-
-        {/* Navigation */}
-        <nav className="flex-1 py-4 px-2">
-          {navItems.map((item) => {
-            const isActive = location.pathname === item.path;
-            return (
-              <Link
-                key={item.path}
-                to={item.path}
-                className={cn(
-                  'flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1 transition-all duration-200 group',
-                  isActive
-                    ? 'bg-sidebar-accent text-sidebar-accent-foreground'
-                    : 'text-sidebar-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground'
-                )}
-              >
-                <item.icon
-                  className={cn(
-                    'w-5 h-5 flex-shrink-0 transition-colors',
-                    isActive ? 'text-primary' : 'group-hover:text-primary'
-                  )}
-                />
-                <AnimatePresence>
-                  {!collapsed && (
-                    <motion.span
-                      initial={{ opacity: 0, width: 0 }}
-                      animate={{ opacity: 1, width: 'auto' }}
-                      exit={{ opacity: 0, width: 0 }}
-                      className="overflow-hidden whitespace-nowrap"
-                    >
-                      {item.label}
-                    </motion.span>
-                  )}
-                </AnimatePresence>
-              </Link>
-            );
-          })}
-        </nav>
-
-        {/* Expand button when collapsed */}
-        {collapsed && (
-          <div className="p-2 border-t border-sidebar-border">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setCollapsed(false)}
-              className="w-full"
-            >
-              <ChevronLeft className="w-4 h-4 rotate-180" />
-            </Button>
-          </div>
-        )}
+        {nav()}
+        <div className="space-y-1 border-t border-sidebar-border p-2">
+          <button
+            onClick={() => setCollapsed((v) => !v)}
+            className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-sidebar-foreground transition-colors hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground"
+          >
+            {collapsed ? <PanelLeftOpen className="h-[18px] w-[18px]" /> : <PanelLeftClose className="h-[18px] w-[18px]" />}
+            {!collapsed && <span>Collapse</span>}
+          </button>
+          <button
+            onClick={async () => {
+              await signOut();
+              toast.success('Signed out');
+              navigate('/');
+            }}
+            className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-sidebar-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
+          >
+            <LogOut className="h-[18px] w-[18px]" />
+            {!collapsed && <span>Sign out</span>}
+          </button>
+        </div>
       </aside>
 
-      {/* Mobile menu overlay */}
+      {/* Mobile drawer */}
       <AnimatePresence>
-        {mobileMenuOpen && (
+        {mobileOpen && (
           <>
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              onClick={() => setMobileMenuOpen(false)}
-              className="fixed inset-0 bg-background/80 backdrop-blur-sm z-40 md:hidden"
+              onClick={() => setMobileOpen(false)}
+              className="fixed inset-0 z-40 bg-background/80 backdrop-blur-sm md:hidden"
             />
             <motion.aside
-              initial={{ x: -280 }}
+              initial={{ x: '-100%' }}
               animate={{ x: 0 }}
-              exit={{ x: -280 }}
-              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="fixed left-0 top-0 h-full w-64 border-r border-border bg-sidebar z-50 md:hidden flex flex-col"
+              exit={{ x: '-100%' }}
+              transition={{ type: 'spring', damping: 26, stiffness: 240 }}
+              className="fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r border-sidebar-border bg-sidebar md:hidden"
             >
-              <div className="h-16 flex items-center justify-between px-4 border-b border-sidebar-border">
-                <Link to="/" className="flex items-center gap-2" onClick={() => setMobileMenuOpen(false)}>
-                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-cyan-400 flex items-center justify-center shadow-lg shadow-primary/30">
-                    <Layers className="w-5 h-5 text-primary-foreground" />
-                  </div>
-                  <span className="text-lg font-bold text-gradient">AutoScaleX</span>
-                </Link>
+              <div className="flex h-16 items-center justify-between border-b border-sidebar-border px-4">
+                <span className="font-display text-sm">AutoScaleX</span>
+                <button onClick={() => setMobileOpen(false)} aria-label="Close menu" className="p-2">
+                  <X className="h-5 w-5" />
+                </button>
               </div>
-              <nav className="flex-1 py-4 px-2">
-                {navItems.map((item) => {
-                  const isActive = location.pathname === item.path;
-                  return (
-                    <Link
-                      key={item.path}
-                      to={item.path}
-                      onClick={() => setMobileMenuOpen(false)}
-                      className={cn(
-                        'flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1 transition-all duration-200',
-                        isActive
-                          ? 'bg-sidebar-accent text-sidebar-accent-foreground'
-                          : 'text-sidebar-foreground hover:bg-sidebar-accent/50'
-                      )}
-                    >
-                      <item.icon className={cn('w-5 h-5', isActive && 'text-primary')} />
-                      <span>{item.label}</span>
-                    </Link>
-                  );
-                })}
-              </nav>
+              {nav(() => setMobileOpen(false))}
+              <div className="border-t border-sidebar-border p-2">
+                <button
+                  onClick={async () => {
+                    await signOut();
+                    navigate('/');
+                  }}
+                  className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-sidebar-foreground hover:text-destructive"
+                >
+                  <LogOut className="h-[18px] w-[18px]" /> Sign out
+                </button>
+              </div>
             </motion.aside>
           </>
         )}
       </AnimatePresence>
 
-      {/* Main content */}
-      <div className={cn('flex-1 flex flex-col transition-all duration-300', collapsed ? 'md:ml-16' : 'md:ml-64')}>
-        {/* Header */}
-        <header className="h-16 border-b border-border bg-card/50 backdrop-blur-xl flex items-center justify-between px-4 sticky top-0 z-30">
-          <div className="flex items-center gap-4">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="md:hidden"
-              onClick={() => setMobileMenuOpen(true)}
-            >
-              <Menu className="w-5 h-5" />
-            </Button>
-            <div className="relative hidden sm:block">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <input
-                type="text"
-                placeholder="Search..."
-                className="h-9 pl-9 pr-4 rounded-lg bg-secondary border-none text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 w-64"
-              />
+      <div className={cn('flex min-h-screen flex-col transition-[padding] duration-300', collapsed ? 'md:pl-[68px]' : 'md:pl-60')}>
+        <header className="sticky top-0 z-30 border-b border-border bg-background/80 backdrop-blur-xl">
+          <div className="flex min-h-16 flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6">
+            <div className="flex items-center gap-3">
+              <button className="rounded-md p-2 hover:bg-secondary md:hidden" onClick={() => setMobileOpen(true)} aria-label="Open menu">
+                <Menu className="h-5 w-5" />
+              </button>
+              <div>
+                <h1 className="font-display text-lg uppercase leading-none">{title}</h1>
+                {subtitle && <p className="mt-1 text-xs text-muted-foreground">{subtitle}</p>}
+              </div>
             </div>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <Button variant="ghost" size="icon" className="relative">
-              <Bell className="w-5 h-5" />
-              <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-primary" />
-            </Button>
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-cyan-400 flex items-center justify-center">
-              <User className="w-4 h-4 text-primary-foreground" />
+            <div className="flex items-center gap-3">
+              {actions}
+              <div
+                className="flex h-8 w-8 items-center justify-center rounded-full bg-primary font-mono text-[11px] font-semibold text-primary-foreground"
+                title={user?.email ?? ''}
+              >
+                {initials}
+              </div>
             </div>
           </div>
         </header>
 
-        {/* Page content */}
-        <main className="flex-1 p-6">
+        <main className="flex-1 px-4 py-6 sm:px-6 lg:px-8">
           <motion.div
-            initial={{ opacity: 0, y: 10 }}
+            key={location.pathname}
+            initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
+            transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
           >
             {children}
           </motion.div>

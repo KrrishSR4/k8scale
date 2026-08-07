@@ -1,64 +1,69 @@
-import { motion } from 'framer-motion';
-import { Github, Zap, TrendingUp, Shield, RotateCcw, Activity } from 'lucide-react';
-import { features } from '@/data/mockData';
+import { Activity, GitBranch, Layers3, Lock, Scaling, Undo2 } from 'lucide-react';
 
-const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
-  github: Github,
-  zap: Zap,
-  'trending-up': TrendingUp,
-  shield: Shield,
-  'rotate-ccw': RotateCcw,
-  activity: Activity,
-};
+const features = [
+  {
+    icon: Scaling,
+    title: 'Autoscaling that reacts',
+    body: 'HPA policies generated per service. Replicas track real CPU pressure between your min and max bounds, not a fixed guess.',
+  },
+  {
+    icon: GitBranch,
+    title: 'GitOps pipelines',
+    body: 'Push to main, get a rollout. Every deploy is recorded with version, commit, duration and full build log.',
+  },
+  {
+    icon: Activity,
+    title: 'Telemetry in the console',
+    body: 'CPU, memory, throughput and p95 latency streamed live per application — no separate observability stack to wire up.',
+  },
+  {
+    icon: Undo2,
+    title: 'One-click rollback',
+    body: 'Every revision is retained. Roll a bad release back to the previous healthy image in a single action.',
+  },
+  {
+    icon: Layers3,
+    title: 'Manifests you can read',
+    body: 'We generate Deployment, Service and HPA YAML you can copy, review, commit and kubectl apply yourself.',
+  },
+  {
+    icon: Lock,
+    title: 'Isolated by default',
+    body: 'Per-account namespaces, scoped credentials, and row-level isolation so one tenant can never read another.',
+  },
+];
 
-const FeaturesSection = () => {
-  return (
-    <section id="features" className="py-32 relative">
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_50%_50%_at_50%_50%,hsl(187_85%_53%_/_0.03),transparent)]" />
-      
-      <div className="container mx-auto px-4 relative z-10">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-16"
-        >
-          <h2 className="text-4xl font-bold mb-4">
-            Everything you need to <span className="text-gradient">deploy with confidence</span>
+const FeaturesSection = () => (
+  <section id="platform" className="relative border-t border-border">
+    <div className="mx-auto grid max-w-[1400px] grid-cols-1 lg:grid-cols-[0.8fr_1.2fr]">
+      <div className="border-b border-border px-5 py-16 sm:px-8 lg:sticky lg:top-16 lg:h-fit lg:border-b-0 lg:border-r lg:px-14 lg:py-24">
+        <div data-reveal>
+          <p className="eyebrow">01 — Platform</p>
+          <h2 className="mt-5 font-display text-[clamp(2rem,3.6vw,3rem)] uppercase text-balance">
+            Everything a platform team builds, already built.
           </h2>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Built for modern development teams who want to ship fast without sacrificing reliability.
+          <p className="mt-5 max-w-sm text-muted-foreground">
+            AutoScaleX replaces the six months of glue code between a container registry and a
+            production cluster.
           </p>
-        </motion.div>
-
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {features.map((feature, index) => {
-            const Icon = iconMap[feature.icon];
-            return (
-              <motion.div
-                key={feature.title}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                whileHover={{ y: -5, transition: { duration: 0.2 } }}
-                className="group"
-              >
-                <div className="glass-card p-6 h-full hover:border-primary/30 transition-colors">
-                  <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
-                    <Icon className="w-6 h-6 text-primary" />
-                  </div>
-                  <h3 className="text-lg font-semibold mb-2 text-foreground">{feature.title}</h3>
-                  <p className="text-muted-foreground">{feature.description}</p>
-                </div>
-              </motion.div>
-            );
-          })}
         </div>
       </div>
-    </section>
-  );
-};
+
+      <div data-reveal="stagger" className="grid grid-cols-1 sm:grid-cols-2">
+        {features.map((f) => (
+          <article
+            key={f.title}
+            className="group relative border-b border-border p-8 transition-colors duration-300 hover:bg-card sm:odd:border-r lg:p-10"
+          >
+            <span className="absolute left-0 top-0 h-full w-px scale-y-0 bg-primary transition-transform duration-500 group-hover:scale-y-100" />
+            <f.icon className="h-5 w-5 text-primary transition-transform duration-300 group-hover:-translate-y-0.5" />
+            <h3 className="mt-5 font-display text-lg uppercase">{f.title}</h3>
+            <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{f.body}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+);
 
 export default FeaturesSection;

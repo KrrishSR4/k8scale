@@ -1,48 +1,112 @@
-import { motion } from 'framer-motion';
-import { Link } from 'react-router-dom';
-import { Layers } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Menu, X, Hexagon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
+import { useAuth } from '@/contexts/AuthContext';
+
+const links = [
+  { label: 'Platform', href: '#platform' },
+  { label: 'Pipeline', href: '#pipeline' },
+  { label: 'Connect cluster', href: '#connect' },
+  { label: 'Access', href: '#waitlist' },
+];
 
 const LandingNav = () => {
+  const [scrolled, setScrolled] = useState(false);
+  const [open, setOpen] = useState(false);
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 24);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
   return (
-    <motion.nav
-      initial={{ y: -20, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.5 }}
-      className="fixed top-0 left-0 right-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-xl"
+    <header
+      className={cn(
+        'fixed inset-x-0 top-0 z-50 transition-all duration-500',
+        scrolled ? 'border-b border-border bg-background/80 backdrop-blur-xl' : 'border-b border-transparent',
+      )}
     >
-      <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-        <Link to="/" className="flex items-center gap-2 group">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-cyan-400 flex items-center justify-center shadow-lg shadow-primary/30 group-hover:shadow-primary/50 transition-shadow">
-            <Layers className="w-5 h-5 text-primary-foreground" />
-          </div>
-          <span className="text-xl font-bold text-gradient">AutoScaleX</span>
+      <nav className="mx-auto flex h-16 max-w-[1400px] items-center justify-between px-5 lg:px-10">
+        <Link to="/" className="group flex items-center gap-2.5" aria-label="AutoScaleX home">
+          <span className="relative flex h-8 w-8 items-center justify-center rounded-md bg-primary text-primary-foreground transition-transform duration-300 group-hover:rotate-90">
+            <Hexagon className="h-4 w-4" strokeWidth={2.5} />
+          </span>
+          <span className="font-display text-base tracking-tight">AutoScaleX</span>
         </Link>
 
-        <div className="hidden md:flex items-center gap-8">
-          <a href="#features" className="text-muted-foreground hover:text-foreground transition-colors">
-            Features
-          </a>
-          <a href="#how-it-works" className="text-muted-foreground hover:text-foreground transition-colors">
-            How it works
-          </a>
-          <a href="#tech-stack" className="text-muted-foreground hover:text-foreground transition-colors">
-            Tech Stack
-          </a>
+        <div className="hidden items-center gap-8 md:flex">
+          {links.map((l) => (
+            <a
+              key={l.href}
+              href={l.href}
+              className="link-underline text-sm text-muted-foreground transition-colors hover:text-foreground"
+            >
+              {l.label}
+            </a>
+          ))}
         </div>
 
-        <div className="flex items-center gap-3">
-          <Link to="/dashboard">
-            <Button variant="ghost" size="sm">
-              View Dashboard
+        <div className="hidden items-center gap-2 md:flex">
+          {user ? (
+            <Button size="sm" onClick={() => navigate('/dashboard')}>
+              Open console
             </Button>
-          </Link>
-          <Button variant="hero" size="sm">
-            Get Started
-          </Button>
+          ) : (
+            <>
+              <Button variant="ghost" size="sm" onClick={() => navigate('/auth')}>
+                Sign in
+              </Button>
+              <Button size="sm" onClick={() => navigate('/auth?mode=signup')}>
+                Start free
+              </Button>
+            </>
+          )}
+        </div>
+
+        <button
+          className="md:hidden rounded-md p-2 text-foreground hover:bg-secondary"
+          onClick={() => setOpen((v) => !v)}
+          aria-label={open ? 'Close menu' : 'Open menu'}
+          aria-expanded={open}
+        >
+          {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+        </button>
+      </nav>
+
+      <div
+        className={cn(
+          'overflow-hidden border-t border-border bg-background/95 backdrop-blur-xl transition-[max-height,opacity] duration-400 md:hidden',
+          open ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0',
+        )}
+      >
+        <div className="flex flex-col gap-1 px-5 py-4">
+          {links.map((l) => (
+            <a
+              key={l.href}
+              href={l.href}
+              onClick={() => setOpen(false)}
+              className="rounded-md px-3 py-2.5 text-sm text-muted-foreground hover:bg-secondary hover:text-foreground"
+            >
+              {l.label}
+            </a>
+          ))}
+          <div className="mt-2 flex gap-2">
+            <Button variant="outline" className="flex-1" onClick={() => navigate('/auth')}>
+              Sign in
+            </Button>
+            <Button className="flex-1" onClick={() => navigate(user ? '/dashboard' : '/auth?mode=signup')}>
+              {user ? 'Console' : 'Start free'}
+            </Button>
+          </div>
         </div>
       </div>
-    </motion.nav>
+    </header>
   );
 };
 

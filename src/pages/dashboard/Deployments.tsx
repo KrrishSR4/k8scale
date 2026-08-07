@@ -1,126 +1,114 @@
-import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { RotateCcw, Clock, GitBranch } from 'lucide-react';
+import { useMemo, useState } from 'react';
+import { ChevronDown, Rocket } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
-import { Button } from '@/components/ui/button';
 import StatusBadge from '@/components/dashboard/StatusBadge';
-import { TableRowSkeleton } from '@/components/dashboard/LoadingSkeleton';
-import { mockDeployments } from '@/data/mockData';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useApplications, useDeployments, useTriggerDeploy } from '@/hooks/useApplications';
+import { cn } from '@/lib/utils';
+
+const relative = (iso: string) => {
+  const diff = Date.now() - new Date(iso).getTime();
+  const m = Math.round(diff / 60000);
+  if (m < 1) return 'just now';
+  if (m < 60) return `${m}m ago`;
+  const h = Math.round(m / 60);
+  if (h < 24) return `${h}h ago`;
+  return `${Math.round(h / 24)}d ago`;
+};
 
 const Deployments = () => {
-  const [loading, setLoading] = useState(true);
+  const { data: apps = [] } = useApplications();
+  const [filter, setFilter] = useState('all');
+  const { data: deployments = [], isLoading } = useDeployments(filter === 'all' ? undefined : filter);
+  const deploy = useTriggerDeploy();
+  const [open, setOpen] = useState<string | null>(null);
 
-  useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 600);
-    return () => clearTimeout(timer);
-  }, []);
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  };
+  const isLive = deployments.some((d) => d.status === 'deploying');
+  const appMap = useMemo(() => Object.fromEntries(apps.map((a) => [a.id, a])), [apps]);
+  const selected = apps.find((a) => a.id === filter);
 
   return (
-    <DashboardLayout>
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground mb-1">Deployments</h1>
-          <p className="text-muted-foreground">View deployment history and rollback if needed</p>
-        </div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="glass-card overflow-hidden"
-        >
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-border">
-                  <th className="text-left px-6 py-4 text-sm font-medium text-muted-foreground">Application</th>
-                  <th className="text-left px-6 py-4 text-sm font-medium text-muted-foreground">Version</th>
-                  <th className="text-left px-6 py-4 text-sm font-medium text-muted-foreground">Type</th>
-                  <th className="text-left px-6 py-4 text-sm font-medium text-muted-foreground">Status</th>
-                  <th className="text-left px-6 py-4 text-sm font-medium text-muted-foreground">Duration</th>
-                  <th className="text-left px-6 py-4 text-sm font-medium text-muted-foreground">Timestamp</th>
-                  <th className="text-left px-6 py-4 text-sm font-medium text-muted-foreground">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {loading ? (
-                  <>
-                    {[...Array(5)].map((_, i) => (
-                      <tr key={i}>
-                        <td colSpan={7}>
-                          <TableRowSkeleton />
-                        </td>
-                      </tr>
-                    ))}
-                  </>
-                ) : (
-                  mockDeployments.map((deployment, index) => (
-                    <motion.tr
-                      key={deployment.id}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: index * 0.05 }}
-                      className="border-b border-border hover:bg-muted/30 transition-colors"
-                    >
-                      <td className="px-6 py-4">
-                        <span className="font-medium text-foreground">{deployment.appName}</span>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-2">
-                          <GitBranch className="w-4 h-4 text-muted-foreground" />
-                          <span className="font-mono text-sm text-primary">{deployment.version}</span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span
-                          className={`inline-flex px-2.5 py-1 rounded-full text-xs font-medium ${
-                            deployment.type === 'canary'
-                              ? 'bg-warning/20 text-warning'
-                              : 'bg-primary/20 text-primary'
-                          }`}
-                        >
-                          {deployment.type}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4">
-                        <StatusBadge status={deployment.status} />
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-1.5 text-muted-foreground">
-                          <Clock className="w-3.5 h-3.5" />
-                          <span className="text-sm">{deployment.duration}</span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className="text-sm text-muted-foreground">{formatDate(deployment.timestamp)}</span>
-                      </td>
-                      <td className="px-6 py-4">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="gap-1.5"
-                          disabled={deployment.status === 'in-progress'}
-                        >
-                          <RotateCcw className="w-3.5 h-3.5" />
-                          Rollback
-                        </Button>
-                      </td>
-                    </motion.tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-        </motion.div>
+    <DashboardLayout
+      title="Deployments"
+      subtitle={isLive ? 'Rollout in progress…' : 'Rollout history and logs'}
+      actions={
+        selected ? (
+          <Button size="sm" disabled={deploy.isPending} onClick={() => deploy.mutate({ app: selected })}>
+            <Rocket className="h-4 w-4" /> Redeploy
+          </Button>
+        ) : null
+      }
+    >
+      <div className="mb-4 max-w-xs">
+        <Select value={filter} onValueChange={setFilter}>
+          <SelectTrigger><SelectValue placeholder="All applications" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All applications</SelectItem>
+            {apps.map((a) => <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>)}
+          </SelectContent>
+        </Select>
       </div>
+
+      {isLoading ? (
+        <div className="space-y-3">{Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-20 rounded-xl" />)}</div>
+      ) : deployments.length ? (
+        <div className="space-y-3">
+          {deployments.map((d) => {
+            const expanded = open === d.id;
+            return (
+              <div key={d.id} className="surface overflow-hidden">
+                <button
+                  onClick={() => setOpen(expanded ? null : d.id)}
+                  className="flex w-full flex-wrap items-center justify-between gap-3 p-4 text-left transition-colors hover:bg-secondary/40"
+                >
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-medium">
+                      {appMap[d.application_id]?.name ?? 'Application'}{' '}
+                      <span className="font-mono text-xs text-muted-foreground">{d.version}</span>
+                    </p>
+                    <p className="truncate text-xs text-muted-foreground">
+                      {d.commit_message} · {relative(d.created_at)}
+                      {d.duration_seconds ? ` · ${d.duration_seconds}s` : ''}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <StatusBadge status={d.status} />
+                    <ChevronDown className={cn('h-4 w-4 text-muted-foreground transition-transform', expanded && 'rotate-180')} />
+                  </div>
+                </button>
+                <AnimatePresence initial={false}>
+                  {expanded && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+                      className="overflow-hidden border-t border-border"
+                    >
+                      <pre className="max-h-72 overflow-auto bg-muted/30 p-4 font-mono text-[11px] leading-relaxed">
+                        {(d.logs ?? []).map((line, i) => (
+                          <div key={i} className={line.startsWith('✓') ? 'text-success' : line.startsWith('→') ? 'text-primary' : ''}>
+                            {line}
+                          </div>
+                        ))}
+                        {d.status === 'deploying' && <div className="animate-pulse text-warning">… streaming</div>}
+                      </pre>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            );
+          })}
+        </div>
+      ) : (
+        <div className="surface p-14 text-center">
+          <p className="font-display text-lg uppercase">No deployments</p>
+          <p className="mt-2 text-sm text-muted-foreground">Trigger a deploy from the Applications page.</p>
+        </div>
+      )}
     </DashboardLayout>
   );
 };
