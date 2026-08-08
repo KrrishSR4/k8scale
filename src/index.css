@@ -134,9 +134,9 @@
 
   .lime-text { @apply text-primary; }
 
-  .status-running { @apply bg-success/12 text-success border-success/30; }
-  .status-failed { @apply bg-destructive/12 text-destructive border-destructive/30; }
-  .status-deploying { @apply bg-warning/12 text-warning border-warning/30; }
+  .status-running { @apply bg-success/10 text-success border-success/30; }
+  .status-failed { @apply bg-destructive/10 text-destructive border-destructive/30; }
+  .status-deploying { @apply bg-warning/10 text-warning border-warning/30; }
   .status-paused { @apply bg-muted text-muted-foreground border-border; }
 
   .link-underline {
