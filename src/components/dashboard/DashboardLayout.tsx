@@ -7,6 +7,7 @@ import {
   Boxes,
   Rocket,
   Activity,
+  ScrollText,
   Settings as SettingsIcon,
   PanelLeftClose,
   PanelLeftOpen,
@@ -24,6 +25,7 @@ const navItems = [
   { icon: Boxes, label: 'Applications', path: '/dashboard/applications' },
   { icon: Rocket, label: 'Deployments', path: '/dashboard/deployments' },
   { icon: Activity, label: 'Monitoring', path: '/dashboard/monitoring' },
+  { icon: ScrollText, label: 'Audit log', path: '/dashboard/audit' },
   { icon: SettingsIcon, label: 'Settings', path: '/dashboard/settings' },
 ];
 
