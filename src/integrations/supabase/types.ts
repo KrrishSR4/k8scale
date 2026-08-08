@@ -77,6 +77,39 @@ export type Database = {
         }
         Relationships: []
       }
+      audit_logs: {
+        Row: {
+          action: string
+          category: string
+          created_at: string
+          id: string
+          metadata: Json
+          target: string | null
+          target_id: string | null
+          user_id: string
+        }
+        Insert: {
+          action: string
+          category?: string
+          created_at?: string
+          id?: string
+          metadata?: Json
+          target?: string | null
+          target_id?: string | null
+          user_id: string
+        }
+        Update: {
+          action?: string
+          category?: string
+          created_at?: string
+          id?: string
+          metadata?: Json
+          target?: string | null
+          target_id?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       deployments: {
         Row: {
           application_id: string

@@ -24,13 +24,21 @@ const nextPoint = (prev: MetricPoint | undefined, seed: number): MetricPoint => 
   };
 };
 
-/** Streaming cluster telemetry, seeded so charts are populated on first paint. */
+export type StreamStatus = 'connecting' | 'live' | 'offline';
+
+const STREAM_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/metrics-stream`;
+
+/**
+ * Live cluster telemetry streamed over Server-Sent Events from the edge.
+ * Falls back to a local simulator if the stream cannot be reached.
+ */
 export const useLiveMetrics = (points = 40, intervalMs = 2000, seed = 0) => {
   const [data, setData] = useState<MetricPoint[]>(() => {
     const out: MetricPoint[] = [];
     for (let i = 0; i < points; i++) out.push(nextPoint(out[i - 1], seed));
     return out;
   });
+  const [status, setStatus] = useState<StreamStatus>('connecting');
   const paused = useRef(false);
 
   useEffect(() => {
@@ -38,15 +46,47 @@ export const useLiveMetrics = (points = 40, intervalMs = 2000, seed = 0) => {
       paused.current = document.hidden;
     };
     document.addEventListener('visibilitychange', onVisibility);
-    const id = setInterval(() => {
-      if (paused.current) return;
-      setData((prev) => [...prev.slice(1), nextPoint(prev[prev.length - 1], seed)]);
-    }, intervalMs);
+
+    const push = (p: MetricPoint) => setData((prev) => [...prev.slice(1), p]);
+
+    let fallback: ReturnType<typeof setInterval> | undefined;
+    const startFallback = () => {
+      if (fallback) return;
+      setStatus('offline');
+      fallback = setInterval(() => {
+        if (paused.current) return;
+        setData((prev) => [...prev.slice(1), nextPoint(prev[prev.length - 1], seed)]);
+      }, intervalMs);
+    };
+
+    let source: EventSource | undefined;
+    try {
+      source = new EventSource(`${STREAM_URL}?interval=${intervalMs}`);
+      source.addEventListener('open', () => setStatus('live'));
+      source.addEventListener('metric', (e) => {
+        if (paused.current) return;
+        try {
+          const raw = JSON.parse((e as MessageEvent).data) as Omit<MetricPoint, 'label'>;
+          setStatus('live');
+          push({ ...raw, label: fmt(new Date(raw.t)) });
+        } catch {
+          /* ignore malformed frame */
+        }
+      });
+      source.addEventListener('error', () => {
+        source?.close();
+        startFallback();
+      });
+    } catch {
+      startFallback();
+    }
+
     return () => {
-      clearInterval(id);
+      source?.close();
+      if (fallback) clearInterval(fallback);
       document.removeEventListener('visibilitychange', onVisibility);
     };
   }, [intervalMs, seed]);
 
-  return data;
+  return { data, status, last: data[data.length - 1] };
 };

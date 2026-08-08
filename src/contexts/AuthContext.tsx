@@ -38,6 +38,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       session,
       loading,
       signOut: async () => {
+        const uid = session?.user?.id;
+        if (uid) {
+          await supabase.from('audit_logs').insert({
+            user_id: uid,
+            action: 'Signed out',
+            category: 'account',
+            metadata: {},
+          } as never);
+        }
         await supabase.auth.signOut();
       },
     }),

@@ -12,7 +12,7 @@ import { useLiveMetrics } from '@/hooks/useLiveMetrics';
 const Overview = () => {
   const { data: apps = [], isLoading } = useApplications();
   const { data: deployments = [] } = useDeployments();
-  const metrics = useLiveMetrics(36, 2000);
+  const { data: metrics, last: latest, status: streamStatus } = useLiveMetrics(36, 2000);
 
   const running = apps.filter((a) => a.status === 'running').length;
   const successes = deployments.filter((d) => d.status === 'success');
@@ -20,7 +20,6 @@ const Overview = () => {
   const avg = successes.length
     ? Math.round(successes.reduce((s, d) => s + (d.duration_seconds ?? 0), 0) / successes.length)
     : 0;
-  const latest = metrics[metrics.length - 1];
 
   return (
     <DashboardLayout
@@ -50,7 +49,7 @@ const Overview = () => {
           <div className="mb-4 flex items-center justify-between">
             <div>
               <h2 className="font-display text-sm uppercase">Request throughput</h2>
-              <p className="text-xs text-muted-foreground">Streaming · 2s resolution</p>
+              <p className="text-xs text-muted-foreground">{streamStatus === 'live' ? 'Live SSE stream · 2s resolution' : streamStatus === 'connecting' ? 'Connecting to stream…' : 'Offline · local simulation'}</p>
             </div>
             <span className="font-mono text-xs text-primary">{latest?.requests ?? 0} req/s</span>
           </div>
