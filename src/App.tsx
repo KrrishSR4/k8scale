@@ -11,6 +11,7 @@ import Overview from './pages/dashboard/Overview';
 import Applications from './pages/dashboard/Applications';
 import Deployments from './pages/dashboard/Deployments';
 import Monitoring from './pages/dashboard/Monitoring';
+import AuditLog from './pages/dashboard/AuditLog';
 import Settings from './pages/dashboard/Settings';
 import NotFound from './pages/NotFound';
 
@@ -34,6 +35,7 @@ const App = () => (
             <Route path="/dashboard/applications" element={guarded(<Applications />)} />
             <Route path="/dashboard/deployments" element={guarded(<Deployments />)} />
             <Route path="/dashboard/monitoring" element={guarded(<Monitoring />)} />
+            <Route path="/dashboard/audit" element={guarded(<AuditLog />)} />
             <Route path="/dashboard/settings" element={guarded(<Settings />)} />
             <Route path="*" element={<NotFound />} />
           </Routes>
