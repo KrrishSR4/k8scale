@@ -15,12 +15,11 @@ const tooltipStyle = {
 const axis = { fontSize: 10, fill: 'hsl(var(--muted-foreground))' };
 
 const Monitoring = () => {
-  const metrics = useLiveMetrics(48, 1500);
+  const { data: metrics, last, status: streamStatus } = useLiveMetrics(48, 1500);
   const { data: apps = [] } = useApplications();
-  const last = metrics[metrics.length - 1];
 
   return (
-    <DashboardLayout title="Monitoring" subtitle="Streaming telemetry · 1.5s resolution">
+    <DashboardLayout title="Monitoring" subtitle={streamStatus === 'live' ? 'Live SSE telemetry · 1.5s resolution' : streamStatus === 'connecting' ? 'Connecting to telemetry stream…' : 'Stream offline · local simulation'}>
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard icon={Cpu} label="CPU" value={`${Math.round(last.cpu)}%`} hint="cluster average" />
         <StatCard icon={MemoryStick} label="Memory" value={`${Math.round(last.memory)}%`} hint="allocated" />
