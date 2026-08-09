@@ -90,7 +90,7 @@ const HeroSection = () => {
         </div>
       </div>
 
-      {/* Right: live terminal */}
+      {/* Right: live cluster topology */}
       <div className="grid-lines relative flex items-center justify-center px-5 py-16 sm:px-8 lg:px-12 lg:py-0">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_70%_35%,hsl(var(--primary)/0.10),transparent)]" />
         <motion.div
@@ -99,35 +99,12 @@ const HeroSection = () => {
           transition={{ duration: 0.9, delay: 0.2 }}
           className="relative w-full max-w-lg [perspective:1400px]"
         >
-          <div ref={panelRef} className="surface overflow-hidden shadow-[0_40px_90px_-30px_rgba(0,0,0,0.9)]">
-            <div className="flex items-center gap-2 border-b border-border px-4 py-3">
-              <span className="h-2.5 w-2.5 rounded-full bg-destructive/70" />
-              <span className="h-2.5 w-2.5 rounded-full bg-warning/70" />
-              <span className="h-2.5 w-2.5 rounded-full bg-success/70" />
-              <span className="ml-3 font-mono text-[11px] uppercase tracking-widest text-muted-foreground">
-                autoscalex — zsh
-              </span>
-            </div>
-            <div className="min-h-[268px] space-y-1.5 p-5 font-mono text-[13px] leading-relaxed">
-              {SCRIPT.slice(0, lines).map((l, i) => (
-                <motion.div
-                  key={`${lines}-${i}`}
-                  initial={{ opacity: 0, x: -6 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.25 }}
-                  className={toneClass[l.tone]}
-                >
-                  {l.text}
-                </motion.div>
-              ))}
-              <span className="inline-block h-4 w-2 animate-blink bg-primary align-middle" />
-            </div>
-          </div>
+          <ClusterTopology />
 
           <div className="mt-4 grid grid-cols-3 gap-3">
             {[
-              { k: 'pods', v: '4/4' },
-              { k: 'cpu', v: '41%' },
+              { k: 'namespaces', v: '12' },
+              { k: 'nodes', v: '3' },
               { k: 'p95', v: '84ms' },
             ].map((m) => (
               <div key={m.k} className="surface surface-hover px-4 py-3">
