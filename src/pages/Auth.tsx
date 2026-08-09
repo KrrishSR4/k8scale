@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { z } from 'zod';
-import { Hexagon, Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
+import KubeWheel from '@/components/brand/KubeWheel';
 import { supabase } from '@/integrations/supabase/client';
 import { lovable } from '@/integrations/lovable/index';
 import { Button } from '@/components/ui/button';
@@ -88,8 +89,8 @@ const Auth = () => {
         <div className="pointer-events-none absolute inset-0 grid-lines opacity-60" />
         <div className="pointer-events-none absolute -left-24 bottom-10 h-96 w-96 rounded-full bg-primary/10 blur-[130px]" />
         <Link to="/" className="relative flex items-center gap-2.5">
-          <span className="flex h-8 w-8 items-center justify-center rounded-md bg-primary text-primary-foreground">
-            <Hexagon className="h-4 w-4" strokeWidth={2.5} />
+          <span className="flex h-8 w-8 items-center justify-center rounded-md bg-primary p-1.5 text-primary-foreground">
+            <KubeWheel strokeWidth={7} />
           </span>
           <span className="font-display text-base">AutoScaleX</span>
         </Link>
@@ -109,8 +110,8 @@ const Auth = () => {
       <div className="flex items-center justify-center px-5 py-16 sm:px-10">
         <div className="w-full max-w-sm">
           <Link to="/" className="mb-8 flex items-center gap-2.5 lg:hidden">
-            <span className="flex h-8 w-8 items-center justify-center rounded-md bg-primary text-primary-foreground">
-              <Hexagon className="h-4 w-4" strokeWidth={2.5} />
+            <span className="flex h-8 w-8 items-center justify-center rounded-md bg-primary p-1.5 text-primary-foreground">
+              <KubeWheel strokeWidth={7} />
             </span>
             <span className="font-display text-base">AutoScaleX</span>
           </Link>
