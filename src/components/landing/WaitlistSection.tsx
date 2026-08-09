@@ -5,6 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
+import KubeMark from '@/components/brand/KubeMark';
 
 const schema = z.object({
   name: z.string().trim().max(80, 'Name must be under 80 characters').optional(),
@@ -49,7 +50,8 @@ const WaitlistSection = () => {
   };
 
   return (
-    <section id="waitlist" className="relative border-t border-border">
+    <section id="waitlist" className="relative overflow-hidden border-t border-border">
+      <KubeMark className="-right-32 -top-32 h-[520px] w-[520px]" opacity={0.1} />
       <div className="mx-auto grid max-w-[1400px] grid-cols-1 lg:grid-cols-2">
         <div className="grain relative border-b border-border px-5 py-16 sm:px-8 lg:border-b-0 lg:border-r lg:px-14 lg:py-24">
           <div className="pointer-events-none absolute right-0 top-1/3 h-72 w-72 rounded-full bg-primary/10 blur-[110px]" />

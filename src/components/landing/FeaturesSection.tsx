@@ -1,4 +1,5 @@
 import { Activity, GitBranch, Layers3, Lock, Scaling, Undo2 } from 'lucide-react';
+import KubeMark from '@/components/brand/KubeMark';
 
 const features = [
   {
@@ -40,10 +41,11 @@ const features = [
 ];
 
 const FeaturesSection = () => (
-  <section id="platform" className="relative border-t border-border">
+  <section id="platform" className="relative overflow-hidden border-t border-border">
     <div className="mx-auto grid max-w-[1400px] grid-cols-1 lg:grid-cols-[0.8fr_1.2fr]">
-      <div className="border-b border-border px-5 py-16 sm:px-8 lg:sticky lg:top-16 lg:h-fit lg:border-b-0 lg:border-r lg:px-14 lg:py-24">
-        <div data-reveal>
+      <div className="relative overflow-hidden border-b border-border px-5 py-16 sm:px-8 lg:sticky lg:top-16 lg:h-fit lg:border-b-0 lg:border-r lg:px-14 lg:py-24">
+        <KubeMark className="-bottom-24 -left-16 h-80 w-80" opacity={0.14} />
+        <div data-reveal className="relative">
           <p className="eyebrow">01 — Platform</p>
           <h2 className="mt-5 font-display text-[clamp(2rem,3.6vw,3rem)] uppercase text-balance">
             Everything a platform team builds, already built.

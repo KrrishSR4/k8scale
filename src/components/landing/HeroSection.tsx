@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { ArrowRight, Terminal } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import KubeWheel from '@/components/brand/KubeWheel';
+import KubeMark from '@/components/brand/KubeMark';
 import ClusterTopology from '@/components/landing/ClusterTopology';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -15,9 +16,7 @@ const HeroSection = () => {
       {/* Left: message */}
       <div className="grain relative flex items-center border-b border-border px-5 py-16 sm:px-8 lg:border-b-0 lg:border-r lg:px-14 lg:py-0">
         <div className="pointer-events-none absolute -left-40 top-1/4 h-[420px] w-[420px] rounded-full bg-primary/10 blur-[120px]" />
-        <div className="pointer-events-none absolute -bottom-24 -left-24 h-[360px] w-[360px] text-foreground/[0.04]">
-          <KubeWheel strokeWidth={2} />
-        </div>
+        <KubeMark className="-bottom-28 -left-28 h-[420px] w-[420px]" opacity={0.16} />
         <div className="relative z-10 max-w-xl">
           <motion.p
             initial={{ opacity: 0, y: 12 }}
@@ -93,6 +92,7 @@ const HeroSection = () => {
       {/* Right: live cluster topology */}
       <div className="grid-lines relative flex items-center justify-center px-5 py-16 sm:px-8 lg:px-12 lg:py-0">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_70%_35%,hsl(var(--primary)/0.10),transparent)]" />
+        <KubeMark className="left-1/2 top-1/2 h-[760px] w-[760px] -translate-x-1/2 -translate-y-1/2" opacity={0.09} />
         <motion.div
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
