@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Menu, X, Hexagon } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import KubeWheel from '@/components/brand/KubeWheel';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -34,8 +35,8 @@ const LandingNav = () => {
     >
       <nav className="mx-auto flex h-16 max-w-[1400px] items-center justify-between px-5 lg:px-10">
         <Link to="/" className="group flex items-center gap-2.5" aria-label="AutoScaleX home">
-          <span className="relative flex h-8 w-8 items-center justify-center rounded-md bg-primary text-primary-foreground transition-transform duration-300 group-hover:rotate-90">
-            <Hexagon className="h-4 w-4" strokeWidth={2.5} />
+          <span className="relative flex h-8 w-8 items-center justify-center rounded-md bg-primary p-1.5 text-primary-foreground transition-transform duration-500 group-hover:rotate-[51.43deg]">
+            <KubeWheel strokeWidth={7} />
           </span>
           <span className="font-display text-base tracking-tight">AutoScaleX</span>
         </Link>

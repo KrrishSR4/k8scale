@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Hexagon } from 'lucide-react';
+import KubeWheel from '@/components/brand/KubeWheel';
 
 const groups = [
   { title: 'Product', links: [['Platform', '#platform'], ['Pipeline', '#pipeline'], ['Connect cluster', '#connect'], ['Console', '/dashboard']] },
@@ -12,8 +12,8 @@ const Footer = () => (
       <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
         <div className="lg:col-span-2">
           <div className="flex items-center gap-2.5">
-            <span className="flex h-8 w-8 items-center justify-center rounded-md bg-primary text-primary-foreground">
-              <Hexagon className="h-4 w-4" strokeWidth={2.5} />
+            <span className="flex h-8 w-8 items-center justify-center rounded-md bg-primary p-1.5 text-primary-foreground">
+              <KubeWheel strokeWidth={7} />
             </span>
             <span className="font-display text-base">AutoScaleX</span>
           </div>

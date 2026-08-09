@@ -1,69 +1,23 @@
-import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowRight, Terminal } from 'lucide-react';
-import gsap from 'gsap';
 import { Button } from '@/components/ui/button';
+import KubeWheel from '@/components/brand/KubeWheel';
+import ClusterTopology from '@/components/landing/ClusterTopology';
 import { useAuth } from '@/contexts/AuthContext';
-
-const SCRIPT = [
-  { text: '$ autoscalex deploy --app api-gateway', tone: 'cmd' },
-  { text: '→ context: prod-eu-west-1 (k8s v1.31)', tone: 'dim' },
-  { text: '✓ image built    sha256:9f31e2c  12.4s', tone: 'ok' },
-  { text: '✓ tests passed   184/184', tone: 'ok' },
-  { text: '✓ manifests applied  deploy/svc/hpa', tone: 'ok' },
-  { text: '✓ rollout complete  4/4 pods ready', tone: 'ok' },
-  { text: '→ live: api-gateway.autoscalex.io  (18.9s)', tone: 'accent' },
-] as const;
-
-const toneClass: Record<string, string> = {
-  cmd: 'text-foreground',
-  dim: 'text-muted-foreground',
-  ok: 'text-success',
-  accent: 'text-primary',
-};
 
 const HeroSection = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const [lines, setLines] = useState<number>(0);
-  const panelRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (lines >= SCRIPT.length) {
-      const reset = setTimeout(() => setLines(0), 4200);
-      return () => clearTimeout(reset);
-    }
-    const t = setTimeout(() => setLines((n) => n + 1), lines === 0 ? 500 : 620);
-    return () => clearTimeout(t);
-  }, [lines]);
-
-  useEffect(() => {
-    const el = panelRef.current;
-    if (!el) return;
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-
-    const onMove = (e: MouseEvent) => {
-      const r = el.getBoundingClientRect();
-      const x = (e.clientX - r.left) / r.width - 0.5;
-      const y = (e.clientY - r.top) / r.height - 0.5;
-      gsap.to(el, { rotateY: x * 6, rotateX: -y * 6, duration: 0.6, ease: 'power2.out' });
-    };
-    const onLeave = () => gsap.to(el, { rotateX: 0, rotateY: 0, duration: 0.8, ease: 'power3.out' });
-
-    el.addEventListener('mousemove', onMove);
-    el.addEventListener('mouseleave', onLeave);
-    return () => {
-      el.removeEventListener('mousemove', onMove);
-      el.removeEventListener('mouseleave', onLeave);
-    };
-  }, []);
 
   return (
     <section className="relative grid min-h-screen grid-cols-1 overflow-hidden pt-16 lg:grid-cols-[1.05fr_1fr]">
       {/* Left: message */}
       <div className="grain relative flex items-center border-b border-border px-5 py-16 sm:px-8 lg:border-b-0 lg:border-r lg:px-14 lg:py-0">
         <div className="pointer-events-none absolute -left-40 top-1/4 h-[420px] w-[420px] rounded-full bg-primary/10 blur-[120px]" />
+        <div className="pointer-events-none absolute -bottom-24 -left-24 h-[360px] w-[360px] text-foreground/[0.04]">
+          <KubeWheel strokeWidth={2} />
+        </div>
         <div className="relative z-10 max-w-xl">
           <motion.p
             initial={{ opacity: 0, y: 12 }}
@@ -71,7 +25,7 @@ const HeroSection = () => {
             transition={{ duration: 0.6 }}
             className="eyebrow"
           >
-            <span className="h-1.5 w-1.5 rounded-full bg-primary" />
+            <KubeWheel className="h-3.5 w-3.5 text-primary" strokeWidth={6} detailed={false} />
             Kubernetes 1.31 · GitOps native
           </motion.p>
 
@@ -136,7 +90,7 @@ const HeroSection = () => {
         </div>
       </div>
 
-      {/* Right: live terminal */}
+      {/* Right: live cluster topology */}
       <div className="grid-lines relative flex items-center justify-center px-5 py-16 sm:px-8 lg:px-12 lg:py-0">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_70%_35%,hsl(var(--primary)/0.10),transparent)]" />
         <motion.div
@@ -145,35 +99,12 @@ const HeroSection = () => {
           transition={{ duration: 0.9, delay: 0.2 }}
           className="relative w-full max-w-lg [perspective:1400px]"
         >
-          <div ref={panelRef} className="surface overflow-hidden shadow-[0_40px_90px_-30px_rgba(0,0,0,0.9)]">
-            <div className="flex items-center gap-2 border-b border-border px-4 py-3">
-              <span className="h-2.5 w-2.5 rounded-full bg-destructive/70" />
-              <span className="h-2.5 w-2.5 rounded-full bg-warning/70" />
-              <span className="h-2.5 w-2.5 rounded-full bg-success/70" />
-              <span className="ml-3 font-mono text-[11px] uppercase tracking-widest text-muted-foreground">
-                autoscalex — zsh
-              </span>
-            </div>
-            <div className="min-h-[268px] space-y-1.5 p-5 font-mono text-[13px] leading-relaxed">
-              {SCRIPT.slice(0, lines).map((l, i) => (
-                <motion.div
-                  key={`${lines}-${i}`}
-                  initial={{ opacity: 0, x: -6 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.25 }}
-                  className={toneClass[l.tone]}
-                >
-                  {l.text}
-                </motion.div>
-              ))}
-              <span className="inline-block h-4 w-2 animate-blink bg-primary align-middle" />
-            </div>
-          </div>
+          <ClusterTopology />
 
           <div className="mt-4 grid grid-cols-3 gap-3">
             {[
-              { k: 'pods', v: '4/4' },
-              { k: 'cpu', v: '41%' },
+              { k: 'namespaces', v: '12' },
+              { k: 'nodes', v: '3' },
               { k: 'p95', v: '84ms' },
             ].map((m) => (
               <div key={m.k} className="surface surface-hover px-4 py-3">
