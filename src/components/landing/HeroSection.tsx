@@ -16,7 +16,7 @@ const HeroSection = () => {
       {/* Left: message */}
       <div className="grain relative flex items-center border-b border-border px-5 py-16 sm:px-8 lg:border-b-0 lg:border-r lg:px-14 lg:py-0">
         <div className="pointer-events-none absolute -left-40 top-1/4 h-[420px] w-[420px] rounded-full bg-primary/10 blur-[120px]" />
-        <KubeMark className="-bottom-28 -left-28 h-[420px] w-[420px]" opacity={0.08} />
+        <KubeMark className="-bottom-28 -left-28 h-[420px] w-[420px]" opacity={0.16} />
         <div className="relative z-10 max-w-xl">
           <motion.p
             initial={{ opacity: 0, y: 12 }}
@@ -92,7 +92,7 @@ const HeroSection = () => {
       {/* Right: live cluster topology */}
       <div className="grid-lines relative flex items-center justify-center px-5 py-16 sm:px-8 lg:px-12 lg:py-0">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_70%_35%,hsl(var(--primary)/0.10),transparent)]" />
-        <KubeMark className="left-1/2 top-1/2 h-[760px] w-[760px] -translate-x-1/2 -translate-y-1/2" opacity={0.045} />
+        <KubeMark className="left-1/2 top-1/2 h-[760px] w-[760px] -translate-x-1/2 -translate-y-1/2" opacity={0.09} />
         <motion.div
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
