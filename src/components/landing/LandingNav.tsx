@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import KubeWheel from '@/components/brand/KubeWheel';
+import BrandLogo from '@/components/brand/BrandLogo';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -35,8 +35,9 @@ const LandingNav = () => {
     >
       <nav className="mx-auto flex h-16 max-w-[1400px] items-center justify-between px-5 lg:px-10">
         <Link to="/" className="group flex items-center gap-2.5" aria-label="AutoScaleX home">
-          <span className="relative flex h-8 w-8 items-center justify-center rounded-md bg-primary p-1.5 text-primary-foreground transition-transform duration-500 group-hover:rotate-[51.43deg]">
-            <KubeWheel strokeWidth={7} />
+          <span className="relative flex h-9 w-9 items-center justify-center">
+            <span className="absolute inset-0 rounded-lg bg-primary/10 opacity-0 blur-md transition-opacity duration-500 group-hover:opacity-100" />
+            <BrandLogo className="relative h-9 w-9" />
           </span>
           <span className="font-display text-base tracking-tight">AutoScaleX</span>
         </Link>
