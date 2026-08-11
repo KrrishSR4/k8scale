@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { Boxes, Rocket, Gauge, Timer, ArrowUpRight } from 'lucide-react';
 import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
@@ -11,7 +12,7 @@ import { useLiveMetrics } from '@/hooks/useLiveMetrics';
 
 const Overview = () => {
   const { data: apps = [], isLoading } = useApplications();
-  const { data: deployments = [] } = useDeployments();
+  const { data: deployments = [], isLoading: depsLoading } = useDeployments();
   const { data: metrics, last: latest, status: streamStatus } = useLiveMetrics(36, 2000);
 
   const running = apps.filter((a) => a.status === 'running').length;
@@ -81,19 +82,26 @@ const Overview = () => {
         <div className="surface p-5">
           <h2 className="mb-4 font-display text-sm uppercase">Recent deployments</h2>
           <div className="space-y-3">
-            {deployments.slice(0, 6).map((d) => {
+            {depsLoading && Array.from({ length: 4 }).map((_, i) => <RowSkeleton key={i} />)}
+            {deployments.slice(0, 6).map((d, i) => {
               const app = apps.find((a) => a.id === d.application_id);
               return (
-                <div key={d.id} className="flex items-center justify-between gap-3 border-b border-border/60 pb-3 last:border-0 last:pb-0">
+                <motion.div
+                  key={d.id}
+                  initial={{ opacity: 0, x: -8 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.4, delay: i * 0.05, ease: [0.16, 1, 0.3, 1] }}
+                  className="flex items-center justify-between gap-3 border-b border-border/60 pb-3 transition-colors last:border-0 last:pb-0 hover:border-primary/30"
+                >
                   <div className="min-w-0">
                     <p className="truncate text-sm">{app?.name ?? 'Application'}</p>
                     <p className="truncate font-mono text-[11px] text-muted-foreground">{d.version}</p>
                   </div>
                   <StatusBadge status={d.status} />
-                </div>
+                </motion.div>
               );
             })}
-            {!deployments.length && (
+            {!depsLoading && !deployments.length && (
               <p className="text-sm text-muted-foreground">No deployments yet. Create an app and ship it.</p>
             )}
           </div>
@@ -107,8 +115,15 @@ const Overview = () => {
         <h2 className="mb-4 font-display text-sm uppercase">Applications</h2>
         {apps.length ? (
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-            {apps.slice(0, 6).map((a) => (
-              <Link key={a.id} to="/dashboard/applications" className="surface surface-hover block p-4">
+            {apps.slice(0, 6).map((a, i) => (
+              <motion.div
+                key={a.id}
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.45, delay: i * 0.06, ease: [0.16, 1, 0.3, 1] }}
+                whileHover={{ y: -3 }}
+              >
+              <Link to="/dashboard/applications" className="surface surface-hover block p-4">
                 <div className="flex items-start justify-between gap-2">
                   <p className="truncate text-sm font-medium">{a.name}</p>
                   <StatusBadge status={a.status} />
@@ -118,6 +133,7 @@ const Overview = () => {
                   {a.region} · {a.replicas} replicas
                 </p>
               </Link>
+              </motion.div>
             ))}
           </div>
         ) : (
