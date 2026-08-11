@@ -15,7 +15,7 @@ import {
   X,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import KubeWheel from '@/components/brand/KubeWheel';
+import BrandLogo from '@/components/brand/BrandLogo';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
@@ -95,9 +95,9 @@ const DashboardLayout = ({ children, title, subtitle, actions }: Props) => {
         )}
       >
         <div className="flex h-16 items-center justify-between border-b border-sidebar-border px-4">
-          <Link to="/" className="flex items-center gap-2.5 overflow-hidden">
-            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-primary p-1.5 text-primary-foreground">
-              <KubeWheel strokeWidth={7} />
+          <Link to="/" className="group flex items-center gap-2.5 overflow-hidden">
+            <span className="flex h-8 w-8 shrink-0 items-center justify-center">
+              <BrandLogo />
             </span>
             {!collapsed && <span className="font-display text-sm">AutoScaleX</span>}
           </Link>

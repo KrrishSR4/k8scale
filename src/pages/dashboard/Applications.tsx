@@ -5,7 +5,7 @@ import StatusBadge from '@/components/dashboard/StatusBadge';
 import ApplicationDialog from '@/components/dashboard/ApplicationDialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Skeleton } from '@/components/ui/skeleton';
+import { CardSkeleton } from '@/components/dashboard/LoadingSkeleton';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -64,7 +64,7 @@ const Applications = () => {
 
       {isLoading ? (
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-56 rounded-xl" />)}
+          {Array.from({ length: 3 }).map((_, i) => <CardSkeleton key={i} />)}
         </div>
       ) : filtered.length ? (
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">

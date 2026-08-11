@@ -3,7 +3,7 @@ import { ChevronDown, Rocket } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import StatusBadge from '@/components/dashboard/StatusBadge';
-import { Skeleton } from '@/components/ui/skeleton';
+import { RowSkeleton } from '@/components/dashboard/LoadingSkeleton';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useApplications, useDeployments, useTriggerDeploy } from '@/hooks/useApplications';
@@ -53,7 +53,7 @@ const Deployments = () => {
       </div>
 
       {isLoading ? (
-        <div className="space-y-3">{Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-20 rounded-xl" />)}</div>
+        <div className="space-y-3">{Array.from({ length: 4 }).map((_, i) => <RowSkeleton key={i} />)}</div>
       ) : deployments.length ? (
         <div className="space-y-3">
           {deployments.map((d) => {
