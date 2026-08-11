@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { Boxes, Rocket, Search, ShieldCheck, Terminal, UserCog } from 'lucide-react';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { Input } from '@/components/ui/input';
-import { Skeleton } from '@/components/ui/skeleton';
+import { RowSkeleton } from '@/components/dashboard/LoadingSkeleton';
 import { cn } from '@/lib/utils';
 import { useAuditLog, type AuditCategory } from '@/hooks/useAuditLog';
 
@@ -79,7 +79,7 @@ const AuditLog = () => {
         {isLoading ? (
           <div className="space-y-3">
             {Array.from({ length: 6 }).map((_, i) => (
-              <Skeleton key={i} className="h-14 rounded-lg" />
+              <RowSkeleton key={i} />
             ))}
           </div>
         ) : entries.length === 0 ? (

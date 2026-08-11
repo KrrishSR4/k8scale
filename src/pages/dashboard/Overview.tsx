@@ -4,7 +4,7 @@ import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'rec
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import StatCard from '@/components/dashboard/StatCard';
 import StatusBadge from '@/components/dashboard/StatusBadge';
-import { Skeleton } from '@/components/ui/skeleton';
+import { StatCardSkeleton, RowSkeleton } from '@/components/dashboard/LoadingSkeleton';
 import { Button } from '@/components/ui/button';
 import { useApplications, useDeployments } from '@/hooks/useApplications';
 import { useLiveMetrics } from '@/hooks/useLiveMetrics';
@@ -33,7 +33,7 @@ const Overview = () => {
     >
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {isLoading ? (
-          Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-[132px] rounded-xl" />)
+          Array.from({ length: 4 }).map((_, i) => <StatCardSkeleton key={i} />)
         ) : (
           <>
             <StatCard icon={Boxes} label="Applications" value={apps.length} hint={`${running} running`} />
