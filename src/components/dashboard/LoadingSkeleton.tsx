@@ -23,7 +23,7 @@ export const CardSkeleton = ({ lines = 3 }: { lines?: number }) => (
       <Shimmer className="h-4 w-16 rounded-full" />
     </div>
     {Array.from({ length: lines }).map((_, i) => (
-      <Shimmer key={i} className="h-3" style={undefined as never} />
+      <Shimmer key={i} className={i === lines - 1 ? 'h-3 w-2/3' : 'h-3 w-full'} />
     ))}
     <div className="flex gap-2 pt-2">
       <Shimmer className="h-8 flex-1 rounded-lg" />
